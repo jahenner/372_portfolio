@@ -25,6 +25,29 @@ def check_input(selection, board) -> bool:
             return False
     except TypeError:
         return False
+    
+def check_win(board):
+    # horizontal
+    for i in range(3):
+        if "x" == board[3*i] == board[3*i+1] == board[3*i+2]:
+            return "X"
+        elif "o" == board[3*i] == board[3*i+1] == board[3*i+2]:
+            return "O"
+    
+    # vertical
+    for i in range(3):
+        if "x" == board[i] == board[3+i] == board[6+i]:
+            return "X"
+        elif "o" == board[i] == board[3+i] == board[6+i]:
+            return "O"
+        
+    # diagonals
+        if "x" == board[0] == board[4] == board[8] or "x" == board[2] == board[4] == board[6]:
+            return "X"
+        elif "o" == board[0] == board[4] == board[8] or "o" == board[2] == board[4] == board[6]:
+            return "O"
+    
+    return None
 
 def main():
     # create server environment
@@ -62,6 +85,18 @@ def main():
                         server_message = input("Please select a valid input\n>")
                     board = update_board(board, "x", int(server_message))
                     print_board(board)
+                    
+                    is_win = check_win(board)
+                    if is_win is not None:
+                        if is_win == "X":
+                            print("You win!")
+                        else:
+                            print("You lost")
+                        board = "/end" + board
+                        connectionSocket.send(board.encode())
+                        server_message = input("Enter message to send...\n>")
+                        break
+                    
                     connectionSocket.send(board.encode())
                     client_play = connectionSocket.recv(1024).decode()
                     
@@ -72,8 +107,20 @@ def main():
                     
                     board = update_board(board, "o", int(client_play))
                     print_board(board)
-                    server_message = input("Select a square or type /q to go back to chat. You will play as x.\n>")
                     
+                    is_win = check_win(board)
+                    if is_win is not None:
+                        if is_win == "X":
+                            print("You win!")
+                        else:
+                            print("You lost")
+                        board = "/end" + is_win + board
+                        connectionSocket.send(board.encode())
+                        server_message = input("Enter message to send...\n>")
+                        break
+                    
+                    server_message = input("Select a square or type /q to go back to chat. You will play as x.\n>")
+                
                 connectionSocket.send(server_message.encode())
                 client_message = connectionSocket.recv(1024).decode()
                 

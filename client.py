@@ -24,6 +24,19 @@ while client_message != "/q":
                 print("Server ended game")
                 client_message = input("Enter message to send...\n>")
                 break
+            elif board[:4] == "/end":
+                winner = board[4]
+                print_board(board[5:])
+                if winner == "X":
+                    print("You lost")
+                else:
+                    print("You win!")
+                print("\n\nWaiting on message from server...")
+                server_message = clientSocket.recv(1024).decode()
+                print(server_message)
+                client_message = input(">")
+                break
+                
             print_board(board)
             
             client_message = input("Select a square you are o or type /q to quit back to chat\n>")
